@@ -1,66 +1,66 @@
 document.addEventListener("DOMContentLoaded", function () {
-  let ws;
   const ul = document.querySelector("ul");
   const input = document.querySelector("textarea");
 
-  function closeConnection() {
-    if (!!ws) {
-      ws.close();
-    }
-  }
-  function sendMessage() {
+  //evensource
+  const eventSource = new EventSource("http://localhost:3000/events");
+  eventSource.onmessage = function (event) {
+    console.log(event.data);
+    console.log("Avinash Kumar");
+    let count = 0;
+    let list = event.data;
+
+    list.forEach((e) => {
+      if (e != "") {
+        const li = document.createElement("li");
+        li.textContent =
+          "Updated: " + new Date().toLocaleString() + ": " + count + "." + e;
+        ul.appendChild(li);
+        ul.appendChild(li);
+      }
+    });
+
+    count = 0;
+  };
+  eventSource.onerror = function (event) {
+    console.log("Error occurred:", event);
+  };
+  async function sendMessage() {
     document.querySelector("button").addEventListener("click", () => {
       if (input.value == undefined || input.value === "") return;
-
-      let s = input.value.split("\n");
-      console.log(s);
-      s.forEach((e) => {
-        if (e != "") {
-          const li = document.createElement("li");
-          li.textContent =
-            "Your input: " + new Date().toLocaleString() + ": " + e;
-          ul.appendChild(li);
-          ul.appendChild(li);
+      console.log(input.value);
+      fetch("http://localhost:3000/data", {
+        method: "POST", // Specify the request method
+        headers: {
+          "Content-Type": "application/json", // Indicate that the body is JSON
+        },
+        body: JSON.stringify({ data: input.value }), // Convert the input to a JSON string
+      }).then((response) => {
+        console.log(response);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`); // Handle non-200 responses
         }
+        let s = input.value.split("\n");
+        console.log(s);
+        /*s.forEach((e) => {
+          if (e != "") {
+            const li = document.createElement("li");
+            li.textContent =
+              "Your input: " + new Date().toLocaleString() + ": " + e;
+            ul.appendChild(li);
+            ul.appendChild(li);
+          }
+        });*/
+        input.value = "";
       });
-      ws.send(JSON.stringify(input.value));
-      input.value = "";
     });
   }
 
+  eventSource.close = function () {
+    console.log("close the connection");
+  };
+
   sendMessage();
-
-  closeConnection();
-  ws = new WebSocket("ws://localhost:3000");
-
-  ws.addEventListener("error", () => {
-    console.log("WebSocket error");
-  });
-
-  ws.addEventListener("open", () => {
-    console.log("WebSocket connection established");
-  });
-
-  ws.addEventListener("close", () => {
-    console.log("WebSocket connection closed");
-  });
-
-  ws.addEventListener("message", (msg) => {
-    alert("Someone changed the file");
-    console.log(JSON.parse(msg.data));
-    let list = JSON.parse(msg.data);
-    let count = 0;
-    list.forEach((e) => {
-      const li = document.createElement("li");
-      li.textContent =
-        "Updated: " + new Date().toLocaleString() + ": " + count + "." + e;
-      ul.appendChild(li);
-      count++;
-    });
-    count = 0;
-  });
-
-  console.log("writing into existing file");
   (function () {
     var measurer = $("<span>", {
       style:

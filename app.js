@@ -37,7 +37,6 @@ function onSocketPostError(error) {
   console.log(error);
 }
 
-
 const wss = new WebSocketServer({ noServer: true });
 server.on("upgrade", async (req, socket, head) => {
   wss.handleUpgrade(req, socket, head, (ws) => {
@@ -49,11 +48,11 @@ server.on("upgrade", async (req, socket, head) => {
 wss.on("connection", async (ws, req) => {
   ws.on("error", onSocketPostError);
   ws.on("message", (msg) => {
-    if (msg === undefined || msg =="") return;
+    if (msg === undefined || msg == "") return;
     fileWriteAndRetrieve(JSON.parse(msg)).then((data) => {
       console.log(data);
       wss.clients.forEach((c) => {
-        if (c.readyState === WebSocket.OPEN) {
+        if (c.readyState === WebSocket.OPEN && c != ws) {
           c.send(JSON.stringify(data));
         }
       });

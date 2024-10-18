@@ -2,7 +2,11 @@ const fs = require("fs").promises;
 
 const fileWriteAndRetrieve = async (msg) => {
   try {
-    await fs.appendFile("input.txt", "\n" + msg, "utf8");
+    let messages = msg.split("\n");
+    await messages.forEach(async (element) => {
+      if (element == undefined || element == "") return;
+      await fs.appendFile("input.txt", "\n" + element, "utf8");
+    });
     console.log("Data is appended to file successfully.");
     const data = await fs.readFile("input.txt", "utf8");
     let lines = data.split("\n");
