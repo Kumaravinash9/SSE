@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<h1> APP DEVELOPMENT</h1>
+<ul id="events"></ul>
+<script>
+        const eventSource = new EventSource('http://localhost:3000/events');
+        eventSource.onmessage = function(event) {
+            console.log(event)
+            console.log(event.data)
+            const newElement = document.createElement("li");
+            newElement.textContent = event.data;
+            document.getElementById("events").appendChild(newElement);
+        };
+        eventSource.onerror = function(event) {
+            console.log('Error occurred:', event);
+        }
+        eventSource.close = function() {
+           
+        }
+</script>
+</html>
